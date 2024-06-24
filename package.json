@@ -1,0 +1,58 @@
+{
+  "name": "gss-pod",
+  "version": "1.0.0",
+  "description": "GSS wrapper layer to serve content from all microservices through GraphQL and REST API",
+  "main": "index.ts",
+  "scripts": {
+    "build": "swc src -d dist",
+    "build-dev": "npm run build && NODE_ENV=developement node --inspect --experimental-specifier-resolution=node dist/index.js",
+    "dev": "nodemon --ext ts --watch src --exec \"npm run build-dev\"",
+    "start": "npm run build && NODE_ENV=production node dist/index.js",
+    "test": "majestic"
+  },
+  "author": "Roshan K Gujarathi",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@apollo/server": "^4.2.2",
+    "@mercury-js/core": "^1.5.1",
+    "@types/node": "^16.11.11",
+    "apollo-server-express": "^3.5.0",
+    "axios": "^0.24.0",
+    "express": "^4.17.1",
+    "graphql": "^16.0.1",
+    "graphql-import": "^1.0.2",
+    "graphql-middleware": "^6.1.12",
+    "graphql-rate-limit": "^3.3.0",
+    "graphql-tools": "^8.2.0",
+    "lodash": "^4.17.21",
+    "merge-graphql-schemas": "^1.7.8",
+    "nodemon": "^2.0.15",
+    "typescript": "^4.5.2"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.1.52",
+    "@swc/core": "^1.2.117",
+    "@swc/jest": "^0.2.11",
+    "@types/axios": "^0.14.0",
+    "@types/express": "^4.17.13",
+    "@types/graphql": "^14.5.0",
+    "@types/jest": "^27.0.3",
+    "@types/lodash": "^4.14.177",
+    "@types/supertest": "^2.0.11",
+    "jest": "^27.4.3",
+    "majestic": "^1.8.1",
+    "supertest": "^6.1.6",
+    "ts-node": "^10.4.0"
+  },
+  "majestic": {
+    "jestScriptPath": "./node_modules/jest/bin/jest.js",
+    "args": [
+      "--config=./jest.config.cjs"
+    ],
+    "env": {
+      "CI": "true"
+    }
+  }
+}

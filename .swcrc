@@ -1,0 +1,14 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "dynamicImport": true
+    }
+  },
+  "env": {
+    "targets": {
+      "node": 16
+    }
+  },
+  "sourceMaps": true
+}
