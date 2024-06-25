@@ -1,6 +1,5 @@
-import mercury from "@mercury-js/core";
-import {UserSchema} from "./User";
-import {ApplicationSchema} from "./Application";
-
-mercury.createList("User", UserSchema);
-mercury.createList("Application", ApplicationSchema);
+export {User} from "./User"
+export {TimeSheet} from "./TimeSheet"
+export {Project} from "./Project"
+export {Task} from "./Task"
+export {TimeData} from "./timeData"

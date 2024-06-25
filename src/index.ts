@@ -19,11 +19,12 @@ import * as dotenv from "dotenv";
 //import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 dotenv.config();
 // Connect models to the process. Mercury will generate the API/Query and Mutations
-// import "./models";
-// import "./profiles";
+ import "./models";
+import "./profiles";
 // import "./hooks";
 import { typeDefs } from "./elastic-search/schema"
 import resolvers from "./elastic-search/Search.Resolvers";
+import { profile } from "console";
 
 // import { typeDefs, resolvers, schemaDirectives } from "./elastic-search";
 // import { setContext } from "./helpers/setContext";
@@ -79,7 +80,7 @@ console.log("DB_URL", process.env.DB_URL);
   await server.start();
    const setContext = async (req:any) => {
      return {
-       role: "ADMIN", // Directly setting the role to 'admin'
+       profile: "EMPLOYEE", // Directly setting the role to 'admin'
      };
    };
   app.use(
@@ -88,8 +89,9 @@ console.log("DB_URL", process.env.DB_URL);
     bodyParser.json(),
     //limiter,
     expressMiddleware(server, {
-      context: async ({ req }) => await setContext(req),
-    })
+      context: async ({req})=>{
+        return{...req,user:{profile:"EMPLOYEE"}};
+      }})
   );
 
   await new Promise<void>((resolve) =>
