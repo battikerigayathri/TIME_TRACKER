@@ -18,9 +18,9 @@ export const User = mercury.createModel(
     role : {
       type :"enum",
       enumType : "string",
-      enum : ["MANAGER","EMPLOYEE","ADMIN"],
+      enum : ["MANAGER","EMPLOYEE"],
       default : "EMPLOYEE"
     },
    
   }
-)
+)   
