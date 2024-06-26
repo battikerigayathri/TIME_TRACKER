@@ -6,10 +6,10 @@ type Query {
   type Mutation{
     signUp(signUpData: signUpData) : signUpResponse
     signin(email:String,password:String):signinResponse
-    verifyMail(email : String , otp : String) : verifyResponse
+    verifyOtp(email : String , otp : String) : verifyResponse
     ForgetPassword(email:String) : response
     resetPassword(email:String , password:String) : result
-    resendOTP(email:String) : response
+    resendOtp(email:String) : response
   }
 
   type result{
@@ -26,12 +26,18 @@ type response{
 }
   type signinResponse{
     msg:String
+    user:String
   }
   input signUpData {
   userName:String,
   email:String,
   password:String,
-  isVerified : Boolean
+  isVerified : Boolean,
+  role:RoleType
+}
+enum RoleType {
+  EMPLOYEE
+  MANAGER
 }
 type signUpResponse{
   id:String

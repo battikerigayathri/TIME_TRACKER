@@ -71,12 +71,13 @@ export default {
         }
         return {
           msg: "User successfully logged in",
+          user: user,
         };
       } catch (error: any) {
         throw new GraphQLError(error);
       }
     },
-    verifyMail: async (
+    verifyOtp: async (
       root: any,
       { email, otp }: { email: string; otp: string },
       ctx: any
@@ -159,26 +160,6 @@ export default {
         throw new GraphQLError(error);
       }
     },
-    resendOTP: async (
-      root: any,
-      { email }: { email: string },
-      ctx: any,
-      otp: string
-    ) => {
-      try {
-        const otp = generateVerificationCode();
-        await RedisClient.set(email, otp);
-        sendVerificationEmail(email, otp + "")
-        // return await ctx.base.User.generateOtp(mobile, "Verification");
-        return {
-          msg: "Otp Sent Successfully",
-          email: email,
-          otp : otp
-        };
-      } catch (error: any) {
-        throw new GraphQLError(error);
-      }
-    }, 
   },
 };
 async function sendVerificationEmail(email: string, otp: string) {
