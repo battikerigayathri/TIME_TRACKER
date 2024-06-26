@@ -37,6 +37,15 @@ const rules = [
           delete: true,
         },
       },
+      {
+        modelName: "TimeData",
+        access: {
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+        },
+      },
 ]
 
 export const EmployeeProfile = mercury.access.createProfile('EMPLOYEE', rules);

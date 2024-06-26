@@ -19,6 +19,12 @@ export const TimeSheet = mercury.createModel(
     type: "relationship",
     ref: "User",
   },
+  timeData:{
+    type:"relationship",
+    ref:"TimeData",
+    many:true
+
+  }
 
   }
 )
