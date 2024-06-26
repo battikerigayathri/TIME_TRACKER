@@ -81,11 +81,8 @@ export default {
        
         return {
           msg: "User successfully logged in",
-          userName: user.userName,
-          email: user.email,
-          role:user.role,
+          user:user,
           token:token
-        
         };
       } catch (error: any) {
         throw new GraphQLError(error);
