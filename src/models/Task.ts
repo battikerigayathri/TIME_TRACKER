@@ -8,5 +8,11 @@ export const Task = mercury.createModel("Task", {
   project: {
     type: "relationship",
     ref:"Project"
+  },//user-ref//status:[in-progress,todo,dev complete, done]
+  status: {
+    type: "enum",
+    enumType: "string",
+    enum: ["IN_PROGRESS", "TODO", "DEV_COMPLETE", "DONE"],
+    default:"TODO"
   }
 });

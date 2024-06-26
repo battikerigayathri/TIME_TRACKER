@@ -30,53 +30,135 @@ export default {
       try {
         const userSchema = mercury.db.User;
         const existingUser = await userSchema.mongoModel.findOne({
-          email: signUpData.email
-        })
+          email: signUpData.email,
+        });
         if (existingUser) throw new GraphQLError("User Already Exists");
         const newUser = await userSchema.mongoModel.create({
-          ...signUpData
-        })
+          ...signUpData,
+        });
         const otp = generateVerificationCode();
         await RedisClient.set(signUpData.email, otp);
         sendVerificationEmail(signUpData.email, otp + "");
         return {
           id: newUser.id,
           msg: "User Registered Successfully",
-          otp:otp
+          otp: otp,
+        };
+      } catch (error: any) {
+        throw new GraphQLError(error);
+      }
+    },
+    signin: async (
+      root: any,
+      { email, password }: { email: string; password: string }
+    ) => {
+      try {
+        const UserSchema = mercury.db.User;
+
+        const user = await UserSchema.mongoModel.findOne({
+          email,
+        });
+        //  console.log(user,"loginuser");
+
+        if (!user) {
+          throw new Error("Invalid  username and/or email");
         }
 
-      } catch (error:any) {
-        throw new GraphQLError(error)
-      }
-      
-    },
-    signin: async (root: any, { email, password }: { email: string, password: string }) => {
-     try {
-      const UserSchema = mercury.db.User;
- 
-      const user = await UserSchema.mongoModel.findOne({
-        email,
-      });
-      //  console.log(user,"loginuser");
- 
-      if (!user) {
-        throw new Error("Invalid  username and/or email");
-      }
- 
-      const isPasswordValid = await user.verifyPassword(password);
-      //  console.log(isPasswordValid.password, "isvalidpassword");
-      if (!isPasswordValid) {
-        throw new Error("Invalid password");
-      }
+        const isPasswordValid = await user.verifyPassword(password);
+        //  console.log(isPasswordValid.password, "isvalidpassword");
+        if (!isPasswordValid) {
+          throw new Error("Invalid password");
+        }
         return {
           msg: "User successfully logged in",
-          
         };
-     } catch (error) {
-      
-     }
+      } catch (error: any) {
+        throw new GraphQLError(error);
+      }
     },
-
+    verifyMail: async (
+      root: any,
+      { email, otp }: { email: string; otp: string },
+      ctx: any
+    ) => {
+      try {
+        const UserSchema = mercury.db.User.mongoModel;
+        let userData = await UserSchema.findOne({ email: email });
+        console.log(userData, "userData");
+        if (!userData) throw new Error("User not Found");
+        const redisOtp = await RedisClient.get(userData.email);
+        console.log(redisOtp, "redisOtp");
+        if (!redisOtp) {
+          throw new Error("Otp has Expried. Please Clicked on Resend Otp");
+        }
+        if (redisOtp != otp) throw new Error("Invalid Otp!");
+        const user = await UserSchema.findOneAndUpdate(
+          { email },
+          { isVerified: true }
+        );
+        console.log(user, "user");
+        if (!user)
+          return {
+            status: 400,
+            msg: "User not Found",
+          };
+        return {
+          msg: "User is Verified Successfully",
+          id: user.id,
+        };
+      } catch (error: any) {
+        throw new GraphQLError(error);
+      }
+    },
+    ForgetPassword: async (
+      root: any,
+      { email }: { email: string },
+      ctx: any
+    ) => {
+      try {
+        const UserSchema = mercury.db.User.mongoModel;
+        const userData = await UserSchema.findOne({ email: email });
+        console.log(userData, "UserData");
+        if (!userData) throw new Error("Invalid Email");
+        const otp = generateVerificationCode();
+        await RedisClient.set(email, otp);
+        sendVerificationEmail(email, otp + "");
+        return {
+          msg: "Otp has been sent successfully to your email",
+          otp: otp,
+          email: email,
+        };
+      } catch (error: any) {
+        throw new GraphQLError(error);
+      }
+    },
+    resetPassword: async (
+      root: any,
+      { email, password }: { email: string; password: string }
+    ) => {
+      try {
+        const UserSchema = mercury.db.User;
+        const user = await UserSchema.get(
+          {
+            email,
+          },
+          { profile: "EMPLOYEE" }
+        );
+        console.log(user, "user");
+        const data = await UserSchema.update(
+          user.id,
+          { password },
+          { profile: "EMPLOYEE" }
+        );
+        console.log(data);
+        return {
+          msg: "User password updated successfully",
+          id: user.id,
+        };
+      } catch (error: any) {
+        throw new GraphQLError(error);
+      }
+    },
   },
 };
 async function sendVerificationEmail(email: string, otp: string) {
