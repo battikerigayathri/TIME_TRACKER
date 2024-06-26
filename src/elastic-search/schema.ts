@@ -9,6 +9,7 @@ type Query {
     verifyMail(email : String , otp : String) : verifyResponse
     ForgetPassword(email:String) : response
     resetPassword(email:String , password:String) : result
+    resendOTP(email:String) : response
   }
 
   type result{
