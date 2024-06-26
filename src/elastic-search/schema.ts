@@ -26,7 +26,10 @@ type response{
 }
   type signinResponse{
     msg:String
-    user:String
+    userName:String
+    email:String
+    role:RoleType
+    token:String
   }
   input signUpData {
   userName:String,

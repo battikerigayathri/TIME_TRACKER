@@ -2,6 +2,7 @@ import mercury from "@mercury-js/core";
 import { GraphQLError } from "graphql";
 import nodemailer from "nodemailer";
 import { RedisClient } from "../services/redis";
+import jwt from "jsonwebtoken";
 
 const getTransporter = () => {
   return nodemailer.createTransport({
@@ -34,7 +35,10 @@ export default {
         });
         if (existingUser) throw new GraphQLError("User Already Exists");
         const newUser = await userSchema.mongoModel.create({
-          ...signUpData,
+          userName: signUpData.userName,
+          email: signUpData.email,
+          password: signUpData.password,
+          role:signUpData.role
         });
         const otp = generateVerificationCode();
         await RedisClient.set(signUpData.email, otp);
@@ -58,6 +62,11 @@ export default {
         const user = await UserSchema.mongoModel.findOne({
           email,
         });
+          const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.SECRET_TOKEN_KEY!,
+            { expiresIn: "30d" }
+          );
         //  console.log(user,"loginuser");
 
         if (!user) {
@@ -69,9 +78,14 @@ export default {
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
+       
         return {
           msg: "User successfully logged in",
-          user: user,
+          userName: user.userName,
+          email: user.email,
+          role:user.role,
+          token:token
+        
         };
       } catch (error: any) {
         throw new GraphQLError(error);
