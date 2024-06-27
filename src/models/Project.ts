@@ -24,6 +24,9 @@ export const Project = mercury.createModel("Project", {
     type: "relationship",
     ref: "User",
   },
+  estimatedTime:{
+    type:"number",
+  },
   task: {
     type: "virtual",
     ref: "Task",
