@@ -11,9 +11,6 @@ export const Project = mercury.createModel("Project", {
     enumType: "string",
     enum: ["EXTERNAL", "INTERNAL"],
   },
-  description: {
-    type:"string",
-  },
   status: {
     type: "enum",
     enumType: "string",
