@@ -1,4 +1,5 @@
 import mercury from "@mercury-js/core";
+import { getServiceRequestNumber } from "../helpers/generatecode";
 
 export const Project = mercury.createModel("Project", {
   name: {
@@ -24,8 +25,12 @@ export const Project = mercury.createModel("Project", {
     type: "relationship",
     ref: "User",
   },
-  estimatedTime:{
-    type:"number",
+  estimatedTime: {
+    type: "number",
+  },
+  code: {
+    type: "string",
+    default: getServiceRequestNumber,
   },
   task: {
     type: "virtual",
@@ -35,5 +40,4 @@ export const Project = mercury.createModel("Project", {
     many: true,
     isEditable: false,
   },
-  
 });

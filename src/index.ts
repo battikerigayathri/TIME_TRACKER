@@ -19,7 +19,8 @@ import * as dotenv from "dotenv";
 //import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 dotenv.config();
 // Connect models to the process. Mercury will generate the API/Query and Mutations
- import "./models";
+import "./models";
+ import "./hooks"
 import "./profiles";
 // import "./hooks";
 import { typeDefs } from "./elastic-search/schema"
