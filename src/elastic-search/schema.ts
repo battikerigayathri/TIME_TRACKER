@@ -10,6 +10,7 @@ type Query {
     ForgetPassword(email:String) : response
     resetPassword(email:String , password:String) : result
     resendOtp(email:String) : response
+    assignUserToProject(projectId: ID!, userId:[ID!]): Project
   }
 
   type result{
@@ -44,5 +45,10 @@ type signUpResponse{
   id:String
   msg:String
   otp:String
+}
+  type Project {
+msg: String
+  projectId: String
+  userId:String
 }
   `;

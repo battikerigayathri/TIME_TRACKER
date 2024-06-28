@@ -171,8 +171,33 @@ export default {
         throw new GraphQLError(error);
       }
     },
+    assignUserToProject: async (root: any, { projectId, userId }: { projectId: string, userId: string }) => {
+        console.log("hii");
+        
+        const projectSchema = mercury.db.Project
+        const data = await mercury.db.Project.get(
+          { _id: projectId },
+          { profile: "EMPLOYEE" },
+      );
+      console.log(data.id,"data");
+      
+      if (!data) {
+        throw new Error('Project not found');
+      }
+      if (!data.assignedTo.includes(userId)) {
+        data.assignedTo.push(userId);
+        await data.save();
+      }
+      console.log(data.assignedTo,"userID");
+      
+        return {
+          msg: "User Added Successfully",
+          projectId: data.id,
+          userId: data.assignedTo.toString(),
+        };
+    },
   },
-};
+  }
 async function sendVerificationEmail(email: string, otp: string) {
   const transporter = getTransporter();
   const mailOptions = {

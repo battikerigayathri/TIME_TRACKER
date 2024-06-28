@@ -7,5 +7,5 @@ export const getRandomNumber = () => {
 };
 
 export const getServiceRequestNumber = () => {
-  return "P" + getRandomNumber(); /// issue with single function sending custom msg inside params (getting same number)
+  return "P" + getRandomNumber(); 
 };
