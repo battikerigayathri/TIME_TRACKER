@@ -16,23 +16,25 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import * as dotenv from "dotenv";
-//import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
+import multer from "multer";
+import sizeOf from "image-size";
+import AWS from "aws-sdk";
 dotenv.config();
-// Connect models to the process. Mercury will generate the API/Query and Mutations
 import "./models";
- import "./hooks"
+import "./hooks";
 import "./profiles";
 // import "./hooks";
-import { typeDefs } from "./elastic-search/schema"
+import { typeDefs } from "./elastic-search/schema";
 import resolvers from "./elastic-search/Search.Resolvers";
-import { profile } from "console";
+import { log, profile } from "console";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import sizeOff from "image-size";
 
 // import { typeDefs, resolvers, schemaDirectives } from "./elastic-search";
 // import { setContext } from "./helpers/setContext";
 // import { upload } from "./helpers/s3Uploader";
 // import { Record } from "./record";
 // import { Base } from "./connect";
-
 
 const app = express();
 app.use(bodyParser.json());
@@ -45,9 +47,47 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+const upload = multer({ storage: multer.memoryStorage() });
 
+// const client = new S3Client({
+//   region: process.env.AWS_REGION_KEY,
+//   credentials: {
+//     accessKeyId: process.env.AWS_ACCESS_KEY || "AKIAUGJSFTLHXBO2645E",
+//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+//   },
+// });
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY || "AKIAUGJSFTLHXBO2645E",
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+  region: process.env.AWS_REGION_KEY,
+});
+const s3 = new AWS.S3();
 
+app.post("/profile", upload.single("file"), async (req: any, res: any) => {
+  try {
+    const files = await req.formData();
+    const file: File | null = files.get("file") as unknown as File;
+    if (!file) {
+      throw new Error("File not found");
+    }
+    const fileBuffer = req.file.buffer;
+    const dimensions = sizeOf(fileBuffer);
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: "profile/logo.png",
+      Body: fileBuffer,
+      ACL: "public-read",
+      ContentType: "image/png",
+    };
 
+    const data = await s3.upload(params).promise();
+    console.log(data, "data");
+
+    res.json({ success: true, data });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
 mercury.addGraphqlSchema(typeDefs, resolvers);
 const schema = applyMiddleware(
   makeExecutableSchema({
@@ -79,20 +119,21 @@ console.log("DB_URL", process.env.DB_URL);
     },
   });
   await server.start();
-   const setContext = async (req:any) => {
-     return {
-       profile: "EMPLOYEE", // Directly setting the role to 'admin'
-     };
-   };
+  const setContext = async (req: any) => {
+    return {
+      profile: "EMPLOYEE", // Directly setting the role to 'admin'
+    };
+  };
   app.use(
     "/graphql",
     cors<cors.CorsRequest>(corsOptions),
     bodyParser.json(),
     //limiter,
     expressMiddleware(server, {
-      context: async ({req})=>{
-        return{...req,user:{profile:"EMPLOYEE"}};
-      }})
+      context: async ({ req }) => {
+        return { ...req, user: { profile: "EMPLOYEE" } };
+      },
+    })
   );
 
   await new Promise<void>((resolve) =>
