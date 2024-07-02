@@ -65,22 +65,34 @@ const s3 = new AWS.S3();
 
 app.post("/profile", upload.single("file"), async (req: any, res: any) => {
   try {
-    if (!req.file) console.log(req.file, "file");
+    if (!req.file) {
+      throw new Error("File not found");
+    }
+
+    const { name } = req.body;
 
     const fileBuffer = req.file.buffer;
     const dimensions = sizeOf(fileBuffer);
+
     const params = {
       Bucket: process.env.BUCKET_NAME,
-      Key: "profile/logo.png",
+      Key: "profile/profile.png",
       Body: fileBuffer,
       ACL: "public-read",
-      ContentType: "image/png",
+      ContentType: req.file.mimetype,
     };
 
-    const data = await s3.upload(params).promise();
-    console.log(data, "data");
-
-    res.json({ success: true, data });
+    const s3Data = await s3.upload(params).promise();
+    const profile = await mercury.db.Profile.create(
+      {
+        name: name,
+        type: req.file.mimetype,
+        path: `https://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}`,
+      },
+      { profile: "EMPLOYEE" }
+    );
+    console.log(profile, "profile");
+    res.status(200).json({ success: true, profile });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

@@ -38,7 +38,7 @@ export default {
           userName: signUpData.userName,
           email: signUpData.email,
           password: signUpData.password,
-          role:signUpData.role
+          role: signUpData.role,
         });
         const otp = generateVerificationCode();
         await RedisClient.set(signUpData.email, otp);
@@ -62,11 +62,11 @@ export default {
         const user = await UserSchema.mongoModel.findOne({
           email,
         });
-          const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            process.env.SECRET_TOKEN_KEY!,
-            { expiresIn: "30d" }
-          );
+        const token = jwt.sign(
+          { id: user.id, email: user.email, role: user.role },
+          process.env.SECRET_TOKEN_KEY!,
+          { expiresIn: "30d" }
+        );
         //  console.log(user,"loginuser");
 
         if (!user) {
@@ -78,11 +78,11 @@ export default {
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
-       
+
         return {
           msg: "User successfully logged in",
-          user:user,
-          token:token
+          user: user,
+          token: token,
         };
       } catch (error: any) {
         throw new GraphQLError(error);
@@ -171,33 +171,36 @@ export default {
         throw new GraphQLError(error);
       }
     },
-    assignUserToProject: async (root: any, { projectId, userId }: { projectId: string, userId: string }) => {
-        console.log("hii");
-        
-        const projectSchema = mercury.db.Project
-        const data = await mercury.db.Project.get(
-          { _id: projectId },
-          { profile: "EMPLOYEE" },
+    assignUserToProject: async (
+      root: any,
+      { projectId, userId }: { projectId: string; userId: string }
+    ) => {
+      console.log("hii");
+
+      const projectSchema = mercury.db.Project;
+      const data = await mercury.db.Project.get(
+        { _id: projectId },
+        { profile: "EMPLOYEE" }
       );
-      console.log(data.id,"data");
-      
+      console.log(data.id, "data");
+
       if (!data) {
-        throw new Error('Project not found');
+        throw new Error("Project not found");
       }
       if (!data.assignedTo.includes(userId)) {
         data.assignedTo.push(userId);
         await data.save();
       }
-      console.log(data.assignedTo,"userID");
-      
-        return {
-          msg: "User Added Successfully",
-          projectId: data.id,
-          userId: data.assignedTo.toString(),
-        };
+      console.log(data.assignedTo, "userID");
+
+      return {
+        msg: "User Added Successfully",
+        projectId: data.id,
+        userId: data.assignedTo.toString(),
+      };
     },
   },
-  }
+};
 async function sendVerificationEmail(email: string, otp: string) {
   const transporter = getTransporter();
   const mailOptions = {
