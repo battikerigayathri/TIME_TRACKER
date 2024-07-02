@@ -65,11 +65,8 @@ const s3 = new AWS.S3();
 
 app.post("/profile", upload.single("file"), async (req: any, res: any) => {
   try {
-    const files = await req.formData();
-    const file: File | null = files.get("file") as unknown as File;
-    if (!file) {
-      throw new Error("File not found");
-    }
+    if (!req.file) console.log(req.file, "file");
+
     const fileBuffer = req.file.buffer;
     const dimensions = sizeOf(fileBuffer);
     const params = {
