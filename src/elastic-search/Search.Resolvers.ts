@@ -173,7 +173,7 @@ export default {
     },
     assignUserToProject: async (
       root: any,
-      { projectId, userId }: { projectId: string; userId: string }
+      { projectId, userId }: { projectId: string; userId: string[] }
     ) => {
       console.log("hii");
 
@@ -183,20 +183,22 @@ export default {
         { profile: "EMPLOYEE" }
       );
       console.log(data.id, "data");
-
       if (!data) {
         throw new Error("Project not found");
       }
-      if (!data.assignedTo.includes(userId)) {
-        data.assignedTo.push(userId);
-        await data.save();
-      }
+      data.assignedTo = [];
+      console.log(data.assignedTo.includes(userId), "data.asssiii");
+      userId.forEach((userId) => {
+        if (!data.assignedTo.includes(userId)) {
+          data.assignedTo.push(userId);
+        }
+      });
+      await data.save();
       console.log(data.assignedTo, "userID");
-
       return {
         msg: "User Added Successfully",
         projectId: data.id,
-        userId: data.assignedTo.toString(),
+        // userId: data.assignedTo,
       };
     },
   },
@@ -209,7 +211,6 @@ async function sendVerificationEmail(email: string, otp: string) {
     subject: "Email Verification",
     text: `Your Otp is ${otp}`,
   };
-
   // console.log("trasnporter", transporter)
   const info = await transporter.sendMail(mailOptions);
   //   console.log("info", info);

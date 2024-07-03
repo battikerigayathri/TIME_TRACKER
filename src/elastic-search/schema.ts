@@ -49,6 +49,6 @@ type signUpResponse{
   type Project {
 msg: String
   projectId: String
-  userId:String
+
 }
   `;
