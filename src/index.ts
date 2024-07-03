@@ -29,6 +29,7 @@ import resolvers from "./elastic-search/Search.Resolvers";
 import { log, profile } from "console";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import sizeOff from "image-size";
+import { v4 as uuidv4 } from "uuid";
 
 // import { typeDefs, resolvers, schemaDirectives } from "./elastic-search";
 // import { setContext } from "./helpers/setContext";
@@ -62,38 +63,72 @@ AWS.config.update({
   region: process.env.AWS_REGION_KEY,
 });
 const s3 = new AWS.S3();
-
 app.post("/profile", upload.single("file"), async (req: any, res: any) => {
   try {
+    const { userId, name, profileId } = req.body;
+    console.log("User ID:", userId);
+    // console.log("Profile ID from body:", profileId);
+
+    const userSchema = mercury.db.User.mongoModel;
+    const user = await userSchema.findById(userId).populate("profile");
+    console.log("User by ID:", user);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const existingProfile = user.profile;
+    if (existingProfile) {
+      console.log("Existing Profile ID:", existingProfile._id.toString());
+    }
+
     if (!req.file) {
       throw new Error("File not found");
     }
 
-    const { name } = req.body;
-
     const fileBuffer = req.file.buffer;
     const dimensions = sizeOf(fileBuffer);
 
+    const fileType = req.file.mimetype.split("/")[1];
+    const fileKey = `profile/${uuidv4()}_${
+      name.toString().split(" ")[0]
+    }.${fileType}`;
+    console.log("File Key:", fileKey);
+
     const params = {
       Bucket: process.env.BUCKET_NAME,
-      Key: "profile/profile.png",
+      Key: fileKey,
       Body: fileBuffer,
       ACL: "public-read",
       ContentType: req.file.mimetype,
     };
 
     const s3Data = await s3.upload(params).promise();
-    const profile = await mercury.db.Profile.create(
-      {
-        name: name,
-        type: req.file.mimetype,
-        path: `https://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}`,
-      },
-      { profile: "EMPLOYEE" }
-    );
-    console.log(profile, "profile");
-    res.status(200).json({ success: true, profile });
+
+    const profileData = {
+      name: name,
+      type: fileType,
+      path: `https://s3.ap-south-1.amazonaws.com/vithiblog.in/${fileKey}`,
+    };
+
+    let profile;
+    if (existingProfile) {
+      // Update existing profile
+      existingProfile.set(profileData);
+      profile = await existingProfile.save();
+    } else {
+      // Create new profile
+      profile = await mercury.db.Profile.create(profileData, {
+        profile: "EMPLOYEE",
+      });
+      user.profile = profile._id;
+      await user.save();
+    }
+
+    console.log("Profile:", profile);
+    res.status(200).json({ success: true, user, profile });
   } catch (error: any) {
+    console.error("Error:", error);
     res.status(400).json({ error: error.message });
   }
 });
