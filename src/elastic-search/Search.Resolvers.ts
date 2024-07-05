@@ -21,7 +21,24 @@ export default {
   Query: {
     hello: (root: any, { name }: { name: string }, ctx: any) =>
       `Hello ${name || "World"}`,
+    //get timesheet method timesheet
+    //timesheet create and send id of it
+    createEmptyTimeSheet: async () => {
+      // Create a new timesheet with empty fields
+      const timesheet = await mercury.db.TimeSheet.mongoModel;
+      const newTimeSheet = await timesheet.create({
+        project: null,
+        description: "",
+        task: null,
+        user: null,
+        timeData: [],
+      });
+      console.log(newTimeSheet);
+
+      return newTimeSheet;
+    },
   },
+
   Mutation: {
     signUp: async (
       root: any,
@@ -40,9 +57,13 @@ export default {
           password: signUpData.password,
           role: signUpData.role,
         });
+        console.log(newUser, "newuser");
+
         const otp = generateVerificationCode();
         await RedisClient.set(signUpData.email, otp);
         sendVerificationEmail(signUpData.email, otp + "");
+        console.log(otp, "otp");
+
         return {
           id: newUser.id,
           msg: "User Registered Successfully",
@@ -196,7 +217,7 @@ export default {
       await data.save();
       console.log(data.assignedTo, "userID");
       return {
-        msg: "User Added Successfully",
+        msg: "Users Added Successfully",
         projectId: data.id,
         // userId: data.assignedTo,
       };

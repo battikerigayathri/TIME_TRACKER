@@ -1,9 +1,11 @@
 export const typeDefs = `
 type Query {
     hello(name: String): String
-   
-  }
-  type Mutation{
+    createEmptyTimeSheet:TimeSheet
+    }
+
+
+type Mutation{
     signUp(signUpData: signUpData) : signUpResponse
     signin(email:String,password:String):signinResponse
     verifyOtp(email : String , otp : String) : verifyResponse
@@ -13,8 +15,11 @@ type Query {
     assignUserToProject(projectId: ID!, userId:[ID!]): Project
   }
 
-  type result{
+type result {
   msg:String
+}
+type TimeSheet {
+  id: ID!
 }
 type verifyResponse {
 msg : String,
@@ -25,12 +30,12 @@ type response{
   email:String
   msg:String
 }
-  type signinResponse{
+type signinResponse{
     msg:String
    user:User
     token:String
-  }
-  input signUpData {
+}
+input signUpData {
   userName:String,
   email:String,
   password:String,
@@ -46,9 +51,8 @@ type signUpResponse{
   msg:String
   otp:String
 }
-  type Project {
-msg: String
+type Project {
+  msg: String
   projectId: String
-
 }
   `;

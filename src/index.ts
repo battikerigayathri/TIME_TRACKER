@@ -65,7 +65,7 @@ AWS.config.update({
 const s3 = new AWS.S3();
 app.post("/profile", upload.single("file"), async (req: any, res: any) => {
   try {
-    const { userId, name, profileId } = req.body;
+    const { userId, name } = req.body;
     console.log("User ID:", userId);
     // console.log("Profile ID from body:", profileId);
 
@@ -87,7 +87,7 @@ app.post("/profile", upload.single("file"), async (req: any, res: any) => {
     }
 
     const fileBuffer = req.file.buffer;
-    const dimensions = sizeOf(fileBuffer);
+    // const dimensions = sizeOf(fileBuffer);
 
     const fileType = req.file.mimetype.split("/")[1];
     const fileKey = `profile/${uuidv4()}_${
