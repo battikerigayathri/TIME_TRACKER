@@ -21,10 +21,7 @@ export default {
   Query: {
     hello: (root: any, { name }: { name: string }, ctx: any) =>
       `Hello ${name || "World"}`,
-    //get timesheet method timesheet
-    //timesheet create and send id of it
     createEmptyTimeSheet: async () => {
-      // Create a new timesheet with empty fields
       const timesheet = await mercury.db.TimeSheet.mongoModel;
       const newTimeSheet = await timesheet.create({
         project: null,
@@ -34,7 +31,6 @@ export default {
         timeData: [],
       });
       console.log(newTimeSheet);
-
       return newTimeSheet;
     },
   },
@@ -57,13 +53,9 @@ export default {
           password: signUpData.password,
           role: signUpData.role,
         });
-        console.log(newUser, "newuser");
-
         const otp = generateVerificationCode();
         await RedisClient.set(signUpData.email, otp);
         sendVerificationEmail(signUpData.email, otp + "");
-        console.log(otp, "otp");
-
         return {
           id: newUser.id,
           msg: "User Registered Successfully",
@@ -79,7 +71,6 @@ export default {
     ) => {
       try {
         const UserSchema = mercury.db.User;
-
         const user = await UserSchema.mongoModel.findOne({
           email,
         });
@@ -88,18 +79,13 @@ export default {
           process.env.SECRET_TOKEN_KEY!,
           { expiresIn: "30d" }
         );
-        //  console.log(user,"loginuser");
-
         if (!user) {
           throw new Error("Invalid  username and/or email");
         }
-
         const isPasswordValid = await user.verifyPassword(password);
-        //  console.log(isPasswordValid.password, "isvalidpassword");
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
-
         return {
           msg: "User successfully logged in",
           user: user,
@@ -117,10 +103,8 @@ export default {
       try {
         const UserSchema = mercury.db.User.mongoModel;
         let userData = await UserSchema.findOne({ email: email });
-        console.log(userData, "userData");
         if (!userData) throw new Error("User not Found");
         const redisOtp = await RedisClient.get(userData.email);
-        console.log(redisOtp, "redisOtp");
         if (!redisOtp) {
           throw new Error("Otp has Expried. Please Clicked on Resend Otp");
         }
@@ -129,7 +113,6 @@ export default {
           { email },
           { isVerified: true }
         );
-        console.log(user, "user");
         if (!user)
           return {
             status: 400,
@@ -151,7 +134,6 @@ export default {
       try {
         const UserSchema = mercury.db.User.mongoModel;
         const userData = await UserSchema.findOne({ email: email });
-        console.log(userData, "UserData");
         if (!userData) throw new Error("Invalid Email");
         const otp = generateVerificationCode();
         await RedisClient.set(email, otp);
@@ -177,13 +159,11 @@ export default {
           },
           { profile: "EMPLOYEE" }
         );
-        console.log(user, "user");
         const data = await UserSchema.update(
           user.id,
           { password },
           { profile: "EMPLOYEE" }
         );
-        console.log(data);
         return {
           msg: "User password updated successfully",
           id: user.id,
@@ -219,7 +199,6 @@ export default {
       return {
         msg: "Users Added Successfully",
         projectId: data.id,
-        // userId: data.assignedTo,
       };
     },
   },
@@ -232,9 +211,7 @@ async function sendVerificationEmail(email: string, otp: string) {
     subject: "Email Verification",
     text: `Your Otp is ${otp}`,
   };
-  // console.log("trasnporter", transporter)
   const info = await transporter.sendMail(mailOptions);
-  //   console.log("info", info);
 }
 function generateVerificationCode() {
   return Math.floor(1000 + Math.random() * 9000); // Generate a new random 4-digit code

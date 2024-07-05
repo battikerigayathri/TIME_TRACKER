@@ -7,7 +7,6 @@ mercury.hook.before("CREATE_TIMESHEET_RECORD", async function (this: any) {
   const now = new Date();
   const today = now.toISOString().split("T")[0];
   console.log(today);
-
   const timesheet = await mercury.db.TimeSheet.mongoModel;
   // Find existing timesheet for the same project, task, and user
   const existingTimeSheet = await timesheet.findOne({
@@ -15,10 +14,8 @@ mercury.hook.before("CREATE_TIMESHEET_RECORD", async function (this: any) {
     task: task,
     user: user,
   });
-  console.log(existingTimeSheet, "today timesheet");
   if (existingTimeSheet) {
     const createdOnDate = new Date(existingTimeSheet.createdOn);
-    console.log(createdOnDate, "createdon");
     if (isNaN(createdOnDate.getTime())) {
       throw new Error("Invalid createdOnDate value");
     }
@@ -26,8 +23,6 @@ mercury.hook.before("CREATE_TIMESHEET_RECORD", async function (this: any) {
     if (createdOnDay === today) {
       existingTimeSheet.timeData = [...existingTimeSheet.timeData, ...timeData];
       await existingTimeSheet.save();
-      console.log(existingTimeSheet.timeData, "array(timedata)");
-
       // Prevent the creation of a new timesheet
       throw new Error(
         "TimeSheet for today exists, updated existing TimeSheet with new TimeData"
@@ -35,4 +30,3 @@ mercury.hook.before("CREATE_TIMESHEET_RECORD", async function (this: any) {
     }
   }
 });
-//  "timeData": ["6686807e16cd88c2cb80343b","6686807c16cd88c2cb803430","66867df902812b3a459f5a71"],
