@@ -3,6 +3,7 @@ import { GraphQLError } from "graphql";
 import nodemailer from "nodemailer";
 import { RedisClient } from "../services/redis";
 import jwt from "jsonwebtoken";
+import { time } from "console";
 
 const getTransporter = () => {
   return nodemailer.createTransport({
@@ -28,7 +29,7 @@ export default {
         description: "",
         task: null,
         user: null,
-        timeData: [],
+        // timeData: [],
       });
       console.log(newTimeSheet);
       return newTimeSheet;
@@ -201,6 +202,69 @@ export default {
         projectId: data.id,
       };
     },
+    updatedata: async (
+      root: any,
+      { timesheetId, timedata }: { timesheetId: string; timedata: string }
+    ) => {
+      try {
+        const now = new Date();
+        const today = now.toISOString().split("T")[0];
+        console.log(today);
+        console.log(timesheetId, timedata, "timesheet and data");
+        const existingTimeSheet = await mercury.db.TimeSheet.get(
+          { _id: timesheetId },
+          { profile: "EMPLOYEE" }
+        );
+        console.log(existingTimeSheet, "TimeSheet");
+
+        if (existingTimeSheet) {
+          const createdOnDate = new Date(existingTimeSheet.createdOn);
+          const createdOnDay = createdOnDate.toISOString().split("T")[0];
+          let returnMessage;
+          let returnId;
+          // Create new TimeData entry
+          const timedata = mercury.db.TimeData.mongoModel;
+          const newTimeData = await timedata.create(
+            {
+              startTime: timedata.startTime,
+              endTime: timedata.endTime,
+            },
+            {}
+          );
+          console.log(newTimeData, "wertyut");
+          if (createdOnDay === today) {
+            existingTimeSheet.timeData = [
+              ...existingTimeSheet.timeData,
+              newTimeData._id,
+            ];
+            await existingTimeSheet.save();
+            console.log("TimeSheet updated with new TimeData");
+            returnMessage = "TimeSheet updated with new TimeData";
+            returnId = existingTimeSheet._id;
+          } else {
+            const TimeSheetModel = mercury.db.TimeSheet.mongoModel;
+            const newTimeSheet = await TimeSheetModel.create({
+              project: existingTimeSheet.project,
+              task: existingTimeSheet.task,
+              description: existingTimeSheet.description,
+              user: existingTimeSheet.user,
+              timeData: [newTimeData._id],
+              createdOn: now,
+            });
+            console.log(newTimeSheet, "New TimeSheet created");
+            returnMessage = "New TimeSheet created";
+            returnId = newTimeSheet._id;
+          }
+          return {
+            msg: returnMessage,
+            id: returnId,
+          };
+        }
+      } catch (error) {
+        console.error("Error updating or creating TimeSheet:", error);
+        throw new Error("Failed to update or create TimeSheet");
+      }
+    },
   },
 };
 async function sendVerificationEmail(email: string, otp: string) {
@@ -216,3 +280,4 @@ async function sendVerificationEmail(email: string, otp: string) {
 function generateVerificationCode() {
   return Math.floor(1000 + Math.random() * 9000); // Generate a new random 4-digit code
 }
+//timesheet update for time--first fetch the id of timesheet and then update all the timedata based on id when the timesheet is todays it should update into that if it is previous then it should create another entry

@@ -13,8 +13,16 @@ type Mutation{
     resetPassword(email:String , password:String) : result
     resendOtp(email:String) : response
     assignUserToProject(projectId: ID!, userId:[ID!]): Project
+    updatedata(timesheetId:String,timedata:timedata):updateresponse
   }
-
+type updateresponse{
+msg:String
+id:String
+}
+input timedata{
+startTime:String,
+endTime:String
+}
 type result {
   msg:String
 }
