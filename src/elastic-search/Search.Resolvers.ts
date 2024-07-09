@@ -222,7 +222,6 @@ export default {
           const createdOnDay = createdOnDate.toISOString().split("T")[0];
           let returnMessage;
           let returnId;
-          // Create new TimeData entry
           const timedata = mercury.db.TimeData.mongoModel;
           const newTimeData = await timedata.create(
             {
@@ -280,4 +279,3 @@ async function sendVerificationEmail(email: string, otp: string) {
 function generateVerificationCode() {
   return Math.floor(1000 + Math.random() * 9000); // Generate a new random 4-digit code
 }
-//timesheet update for time--first fetch the id of timesheet and then update all the timedata based on id when the timesheet is todays it should update into that if it is previous then it should create another entry
