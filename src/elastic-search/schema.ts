@@ -14,7 +14,14 @@ type Mutation{
     resendOtp(email:String) : response
     assignUserToProject(projectId: ID!, userId:[ID!]): Project
     updatedata(timesheetId:String,timedata:timedata):updateresponse
+   timeSheetcreation(project:String,user:String,task:String,description:String,timedata:timedata):Response
+    updateee(timesheetId:String,timedata:timedata):updateresponse
+    timerTimesheet(timesheetId:String,timedata:timedata,project:String,task:String,user:String):Response
   }
+    type Response{
+  msg:String
+  id:String
+    }
 type updateresponse{
 msg:String
 id:String

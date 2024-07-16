@@ -1,30 +1,25 @@
 import mercury from "@mercury-js/core";
 
-export const TimeSheet = mercury.createModel(
-  "TimeSheet",
-  {
-   project : {
-    type : "relationship",
-    ref : "Project"
-   },
-   description : {
-    type : "string",
-    require : true
-   },
-   task : {
-    type : "relationship",
-    ref : "Task"
-   },
-   user: {
+export const TimeSheet = mercury.createModel("TimeSheet", {
+  project: {
+    type: "relationship",
+    ref: "Project",
+  },
+  description: {
+    type: "string",
+    require: true,
+  },
+  task: {
+    type: "relationship",
+    ref: "Task",
+  },
+  user: {
     type: "relationship",
     ref: "User",
   },
-  timeData:{
-    type:"relationship",
-    ref:"TimeData",
-    many:true
-
-  }
-
-  }
-)
+  timeData: {
+    type: "relationship",
+    ref: "TimeData",
+    many: true,
+  },
+});
