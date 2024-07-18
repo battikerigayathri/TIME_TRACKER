@@ -377,7 +377,6 @@ export default {
         throw new Error("Failed to create or update timesheet");
       }
     },
-
     timerTimesheet: async (
       root: any,
       {
@@ -520,7 +519,6 @@ export default {
     },
   },
 };
-// timesheet id pamputhe
 async function sendVerificationEmail(email: string, otp: string) {
   const transporter = getTransporter();
   const mailOptions = {
